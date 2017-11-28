@@ -1,0 +1,2 @@
+figure;
+plot(cellSizeArray, accuracyArray);

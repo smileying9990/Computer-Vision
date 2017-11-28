@@ -1,0 +1,55 @@
+I = rgb2gray(imread('data/cat.bmp'));
+I1= rgb2gray(imread('data/dog.bmp'));
+figure(1),subplot(2,2,1), imshow(I);
+figure(2),subplot(2,2,1), imshow(I1);
+
+%Determine good padding for Fourier transform
+PQ = paddedsize(size(I));
+%Create a Gaussian Lowpass filter 5% the width of the Fourier transform
+%D0 = 0.05*PQ(1);
+D0 = 0.05*PQ(1);
+%D0 = 0.01*PQ(1);
+L = lpfilter('btw', PQ(1), PQ(2), D0);
+% Calculate the discrete Fourier transform of the image
+F=fft2(double(I),size(L,1),size(L,2));
+% Apply the highpass filter to the Fourier spectrum of the image
+LPFS_I = L.*F;
+LPF_I=real(ifft2(LPFS_I)); 
+LPF_I=LPF_I(1:size(I,1), 1:size(I,2));
+figure(1),subplot(2,2,2),imshow(LPF_I,[])
+Fc=fftshift(F);
+Fcf=fftshift(LPFS_I);
+% use abs to compute the magnitude and use log to brighten display
+S1=log(1+abs(Fc)); 
+S2=log(1+abs(Fcf));
+figure(1),subplot(2,2,3), imshow(S1,[])
+figure(1),subplot(2,2,4), imshow(S2,[])
+
+
+H = hpfilter('btw', PQ(1), PQ(2), D0);
+
+% Calculate the discrete Fourier transform of the image
+F1=fft2(double(I1),size(H,1),size(H,2));
+
+% Apply the highpass filter to the Fourier spectrum of the image
+LPFS_I1 = H.*F1;
+
+LPF_I1=real(ifft2(LPFS_I1)); 
+LPF_I1=LPF_I1(1:size(I,1), 1:size(I,2));
+figure(2),subplot(2,2,2),imshow(LPF_I1,[]);
+Fc1=fftshift(F1);
+Fcf1=fftshift(LPFS_I1);
+% use abs to compute the magnitude and use log to brighten display
+S11=log(1+abs(Fc1)); 
+S21=log(1+abs(Fcf1));
+figure(2),subplot(2,2,3), imshow(S11,[])
+figure(2),subplot(2,2,4), imshow(S21,[])
+
+
+
+
+
+hybrid_image=LPFS_I+LPFS_I1;
+hybrid_image=real(ifft2(hybrid_image)); 
+hybrid_image=hybrid_image(1:size(I,1), 1:size(I,2));
+figure(3),imshow(hybrid_image,[]);
